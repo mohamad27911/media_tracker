@@ -111,7 +111,7 @@ export default function Operations() {
   const [typeFilter, setTypeFilter] = useState<string>("All")
   const [statusFilter, setStatusFilter] = useState<string>("All")
   const [showFilters, setShowFilters] = useState(false)
-  const [sortConfig, setSortConfig] = useState<{ key: keyof MediaItem; direction: "asc" | "desc" } | null>(null)
+  const [sortConfig, ] = useState<{ key: keyof MediaItem; direction: "asc" | "desc" } | null>(null)
 
   // Get unique types and statuses for filters
   const mediaTypes = ["All", "Movie", "TV Show", "Book", "Game", "Music"]
