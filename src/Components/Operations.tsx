@@ -20,6 +20,7 @@ import {
   Music,
 } from "lucide-react"
 import Chatbot from "./ChatBot"
+import { AIRecommendations } from "./AIRecommendations"
 
 interface MediaItem {
   id: string
@@ -644,6 +645,8 @@ export default function Operations() {
           </div>
         </div>
       </div>
+         <AIRecommendations items={mediaList}/>
+
       <Chatbot mediaItems={mediaList}/>
     </div>
   )

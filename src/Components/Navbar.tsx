@@ -82,10 +82,12 @@ function Navbar() {
                   <MoonIcon className="h-5 w-5" />
                 )}
               </button>
+              <a href='/auth/login'>
               
               <button className="px-4 py-2 rounded-md bg-[#29b093] cursor-pointer dark:bg-[#e0f11f] text-white dark:text-[#121212] font-medium hover:opacity-90 transition-opacity duration-200 shadow-sm">
                 New Entry
               </button>
+              </a>
             </div>
           </div>
 
