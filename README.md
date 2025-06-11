@@ -1,8 +1,6 @@
 
 # 🎥 Media Collection Tracker
 
-![Demo Screenshot](./public/screenshot.png) <!-- Replace with your actual image path -->
-
 A personal media collection app with an AI-powered assistant. Track your movies, books, games, and music — all in one place.
 
 ---
