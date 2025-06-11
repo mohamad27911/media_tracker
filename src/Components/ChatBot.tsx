@@ -5,31 +5,28 @@ interface Message {
   content: string;
 }
 
-interface InventoryItem {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  price: number;
-  lastRestocked: string;
-  supplier: string;
+interface MediaItem {
+  id: string
+  title: string
+  type: "Movie" | "TV Show" | "Book" | "Game" | "Music"
+  status: "owned" | "whishlist" | "completed" | "currently using"
+  rating: number
+  genre: string
+  releaseDate: string
+  notes: string
+  dateAdded: string
 }
 
-export default function Chatbot() {
+interface ChatbotProps {
+  mediaItems: MediaItem[];
+}
+
+export default function Chatbot({ mediaItems }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Sample inventory data
-  const [inventory, ] = useState<InventoryItem[]>([
-    { id: '1', name: 'Wireless Mouse', category: 'Electronics', quantity: 42, price: 24.99, lastRestocked: '2023-05-15', supplier: 'TechGear Inc.' },
-    { id: '2', name: 'Mechanical Keyboard', category: 'Electronics', quantity: 18, price: 89.99, lastRestocked: '2023-06-02', supplier: 'KeyMaster Ltd.' },
-    { id: '3', name: 'HDMI Cable', category: 'Accessories', quantity: 127, price: 12.49, lastRestocked: '2023-06-10', supplier: 'ConnectPro' },
-    { id: '4', name: 'USB-C Adapter', category: 'Accessories', quantity: 35, price: 15.99, lastRestocked: '2023-05-28', supplier: 'PortTech' },
-    { id: '5', name: 'Laptop Stand', category: 'Furniture', quantity: 23, price: 34.95, lastRestocked: '2023-06-05', supplier: 'ErgoWorks' },
-  ]);
 
   // Replace with your actual Gemini API key
   const GEMINI_API_KEY = 'AIzaSyDdnOG2-pomHKnNZHRvykwuKY1DqwtMPfA';
@@ -53,9 +50,9 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      // Create a string representation of the inventory for the AI prompt
-      const inventorySummary = inventory.map(item => 
-        `${item.name} (${item.category}): ${item.quantity} in stock, $${item.price} each`
+      // Create a string representation of the media collection for the AI prompt
+      const mediaSummary = mediaItems.map(item => 
+        `${item.title} (${item.type}, ${item.genre}, ${item.dateAdded}) - ${item.status}${item.rating ? `, rated ${item.rating}/10` : ''}`
       ).join('\n');
 
       const response = await fetch(API_URL, {
@@ -68,15 +65,15 @@ export default function Chatbot() {
             {
               parts: [
                 {
-                  text: `You are an AI assistant for an inventory management system. 
-                  Current inventory includes:\n${inventorySummary}\n\n
-                  Your responses should be concise and focused on inventory management.
+                  text: `You are an AI assistant for a personal media collection tracker. 
+                  Current collection includes:\n${mediaSummary}\n\n
+                  Your responses should be concise and focused on media tracking.
                   You can help with:\n
-                  - Checking stock levels\n
-                  - Finding items by category\n
-                  - Identifying low stock items\n
-                  - Providing item details\n
-                  - Suggesting when to reorder\n\n
+                  - Finding media by title, type, or genre\n
+                  - Listing items in your wishlist\n
+                  - Suggesting similar media based on your collection\n
+                  - Tracking completion status\n
+                  - Providing details about specific items\n\n
                   User question: ${input}`
                 }
               ]
@@ -110,7 +107,7 @@ export default function Chatbot() {
         <div className="w-80 h-[500px] bg-white dark:bg-[#121212] rounded-t-xl shadow-xl flex flex-col border border-[#29b093] dark:border-[#e0f11f] overflow-hidden">
           {/* Chat header */}
           <div className="bg-[#29b093] dark:bg-[#e0f11f] text-white dark:text-[#121212] p-3 flex justify-between items-center">
-            <h3 className="font-bold">Inventory Assistant</h3>
+            <h3 className="font-bold">Media Collection Assistant</h3>
             <button 
               onClick={() => setIsOpen(false)}
               className="p-1 rounded-full hover:bg-white cursor-pointer hover:text-[#121213] dark:hover:text-white hover:bg-opacity-20 dark:hover:bg-[#121212] dark:hover:bg-opacity-20 transition"
@@ -125,8 +122,8 @@ export default function Chatbot() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
-                <p>Ask about inventory items, stock levels, or categories.</p>
-                <p className="text-sm mt-2">Try: "How many wireless mice do we have?"</p>
+                <p>Ask about your media collection, wishlist, or recommendations.</p>
+                <p className="text-sm mt-2">Try: "What movies do I own from 2020?"</p>
               </div>
             ) : (
               messages.map((message, index) => (
@@ -166,7 +163,7 @@ export default function Chatbot() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about inventory..."
+                placeholder="Ask about your media..."
                 className="flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-gray-900 dark:text-white"
                 disabled={isLoading}
               />

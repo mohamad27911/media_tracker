@@ -7,28 +7,28 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
             <div className="relative z-10 text-center">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#ff6b6b] to-[#4ecdc4] dark:from-[#ff9e9e] dark:to-[#6fffe8]">
-                  My Media Vault
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#29b093] to-[#1f67f1] dark:from-[#e0f11f] dark:to-[#29b093]">
+                  MediaTracker
                 </span>
                 <br />
-                Track Your Personal Collection
+                Organize Your Digital Library
               </h1>
               <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
-                Organize your movies, books, games, and music in one place. 
-                Never forget what you own—or what you want next.
+                Track movies, books, games, and music in one place. 
+                Never lose sight of your collection—or what’s next on your list.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <a
                   href="#features"
-                  className="px-8 py-3 rounded-md bg-[#ff6b6b] dark:bg-[#6fffe8] text-white dark:text-[#121212] font-medium hover:opacity-90 transition-opacity duration-200 shadow-lg text-center"
+                  className="px-8 py-3 rounded-md bg-[#29b093] dark:bg-[#e0f11f] text-white dark:text-[#121212] font-medium hover:opacity-90 transition-opacity duration-200 shadow-lg text-center"
                 >
                   Start Cataloging
                 </a>
                 <a
-                  href="/demo"
-                  className="px-8 py-3 rounded-md dark:bg-[#121212] text-[#ff6b6b] dark:text-[#6fffe8] border border-[#ff6b6b] dark:border-[#6fffe8] font-medium hover:bg-[#ff6b6b] hover:text-white dark:hover:bg-[#6fffe8] dark:hover:text-[#121212] transition-colors duration-200 shadow-sm text-center"
+                  href="/"
+                  className="px-8 py-3 rounded-md dark:bg-[#121212] text-[#29b093] dark:text-[#e0f11f] border border-[#29b093] dark:border-[#e0f11f] font-medium hover:bg-[#29b093] hover:text-white dark:hover:bg-[#e0f11f] dark:hover:text-[#121212] transition-colors duration-200 shadow-sm text-center"
                 >
-                  See Demo
+                  Live Demo
                 </a>
               </div>
             </div>
@@ -43,10 +43,10 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Why Use My Media Vault?
+                Designed for Collectors
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                The ultimate tool for collectors, geeks, and hobbyists.
+                Everything you need to catalog and enjoy your media.
               </p>
             </div>
 
@@ -58,8 +58,8 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                     </svg>
                   ),
-                  title: "Movies & TV Shows",
-                  description: "Catalog your physical and digital media with custom tags."
+                  title: "Movies & TV",
+                  description: "Catalog physical and digital media with custom tags."
                 },
                 {
                   icon: (
@@ -68,7 +68,7 @@ export default function HomePage() {
                     </svg>
                   ),
                   title: "Books & Comics",
-                  description: "Track reading progress and organize by series or genre."
+                  description: "Track reading progress and organize by genre."
                 },
                 {
                   icon: (
@@ -77,7 +77,7 @@ export default function HomePage() {
                     </svg>
                   ),
                   title: "Games & Consoles",
-                  description: "Log playtime, completion status, and wishlist items."
+                  description: "Log playtime, achievements, and wishlists."
                 },
                 {
                   icon: (
@@ -94,8 +94,8 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                     </svg>
                   ),
-                  title: "Custom Categories",
-                  description: "Add anything—figures, posters, or rare collectibles."
+                  title: "Custom Collections",
+                  description: "Add figures, posters, or rare memorabilia."
                 },
                 {
                   icon: (
@@ -104,14 +104,14 @@ export default function HomePage() {
                     </svg>
                   ),
                   title: "Private & Secure",
-                  description: "Your collection stays yours—no ads, no data mining."
+                  description: "Your data stays yours—no ads, no tracking."
                 }
               ].map((feature, index) => (
                 <div 
                   key={index}
                   className="bg-gray-50 dark:bg-[#1a1a1a] p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-[#333]"
                 >
-                  <div className="text-[#ff6b6b] dark:text-[#6fffe8] mb-4">
+                  <div className="text-[#29b093] dark:text-[#e0f11f] mb-4">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">

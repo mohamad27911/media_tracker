@@ -9,17 +9,19 @@ function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-md bg-[#29b093] dark:bg-[#e0f11f] flex items-center justify-center transition-colors duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white dark:text-[#121212]" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                  <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-1a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H19a1 1 0 001-1V5a1 1 0 00-1-1H3z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white dark:text-[#121212]" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zm0 2v10h16V7H4z" />
+  <path d="M9 9.5l4 2.5-4 2.5v-5z" />
+  <path d="M5 18h14v1H5v-1z" />
+</svg>
+
               </div>
               <span className="text-xl font-bold text-[#29b093] dark:text-[#e0f11f] transition-colors duration-300">
                 MediaTracker
               </span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Advanced inventory management system for modern businesses.
+              Advanced media tracker system for personal uses.
             </p>
          
           </div>

@@ -1,470 +1,650 @@
-import { useState,  } from 'react';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiPlus, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+"use client"
 
-interface InventoryItem {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  price: number;
-  lastRestocked: string;
-  supplier: string;
+import type React from "react"
+
+import { useState } from "react"
+import {
+  Search,
+  Filter,
+  Edit2,
+  Trash2,
+  Plus,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Star,
+  Calendar,
+  Play,
+  Book,
+  Gamepad2,
+  Music,
+} from "lucide-react"
+import Chatbot from "./ChatBot"
+
+interface MediaItem {
+  id: string
+  title: string
+  type: "Movie" | "TV Show" | "Book" | "Game" | "Music"
+  status: "owned" | "whishlist" | "completed" | "currently using"
+  rating: number
+  genre: string
+  releaseDate: string
+  notes: string
+  dateAdded: string
 }
 
 export default function Operations() {
-  // Sample inventory data
-  const [inventory, setInventory] = useState<InventoryItem[]>([
-    { id: '1', name: 'Wireless Mouse', category: 'Electronics', quantity: 42, price: 24.99, lastRestocked: '2023-05-15', supplier: 'TechGear Inc.' },
-    { id: '2', name: 'Mechanical Keyboard', category: 'Electronics', quantity: 18, price: 89.99, lastRestocked: '2023-06-02', supplier: 'KeyMaster Ltd.' },
-    { id: '3', name: 'HDMI Cable', category: 'Accessories', quantity: 127, price: 12.49, lastRestocked: '2023-06-10', supplier: 'ConnectPro' },
-    { id: '4', name: 'USB-C Adapter', category: 'Accessories', quantity: 35, price: 15.99, lastRestocked: '2023-05-28', supplier: 'PortTech' },
-    { id: '5', name: 'Laptop Stand', category: 'Furniture', quantity: 23, price: 34.95, lastRestocked: '2023-06-05', supplier: 'ErgoWorks' },
-  ]);
+  // Sample media data
+  const [mediaList, setMediaList] = useState<MediaItem[]>([
+    {
+      id: "1",
+      title: "The Matrix",
+      type: "Movie",
+      status: "completed",
+      rating: 5,
+      genre: "Sci-Fi",
+      releaseDate: "1999-03-31",
+      notes: "Mind-bending classic!",
+      dateAdded: "2024-01-15",
+    },
+    {
+      id: "2",
+      title: "Breaking Bad",
+      type: "TV Show",
+      status: "completed",
+      rating: 5,
+      genre: "Drama",
+      releaseDate: "2008-01-20",
+      notes: "Best series ever",
+      dateAdded: "2024-01-20",
+    },
+    {
+      id: "3",
+      title: "Dune",
+      type: "Book",
+      status: "whishlist",
+      rating: 4,
+      genre: "Sci-Fi",
+      releaseDate: "1965-08-01",
+      notes: "Complex but rewarding",
+      dateAdded: "2024-02-01",
+    },
+    {
+      id: "4",
+      title: "The Witcher 3",
+      type: "Game",
+      status: "currently using",
+      rating: 5,
+      genre: "RPG",
+      releaseDate: "2015-05-19",
+      notes: "Amazing open world",
+      dateAdded: "2024-02-10",
+    },
+    {
+      id: "5",
+      title: "Dark Side of the Moon",
+      type: "Music",
+      status: "owned",
+      rating: 5,
+      genre: "Progressive Rock",
+      releaseDate: "1973-03-01",
+      notes: "Timeless masterpiece",
+      dateAdded: "2024-02-15",
+    },
+  ])
 
   // Form state
-  const [formData, setFormData] = useState<Omit<InventoryItem, 'id'>>({ 
-    name: '', 
-    category: '', 
-    quantity: 0, 
-    price: 0, 
-    lastRestocked: new Date().toISOString().split('T')[0], 
-    supplier: '' 
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<Omit<MediaItem, "id" | "dateAdded">>({
+    title: "",
+    type: "Movie",
+    status: "owned",
+    rating: 0,
+    genre: "",
+    releaseDate: "",
+    notes: "",
+  })
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
 
   // Search and filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('All');
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortConfig, setSortConfig] = useState<{ key: keyof InventoryItem; direction: 'asc' | 'desc' } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("")
+  const [typeFilter, setTypeFilter] = useState<string>("All")
+  const [statusFilter, setStatusFilter] = useState<string>("All")
+  const [showFilters, setShowFilters] = useState(false)
+  const [sortConfig, setSortConfig] = useState<{ key: keyof MediaItem; direction: "asc" | "desc" } | null>(null)
 
-  // Get unique categories for filter
-  const categories = ['All', ...new Set(inventory.map(item => item.category))];
+  // Get unique types and statuses for filters
+  const mediaTypes = ["All", "Movie", "TV Show", "Book", "Game", "Music"]
+  const statusOptions = ["owned", "whishlist", "currently using", "completed"]
 
-  // Filtered and sorted inventory
-  const filteredInventory = inventory.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  // Filtered and sorted media
+  const filteredMedia = mediaList.filter((item) => {
+    const matchesSearch =
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.notes.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = typeFilter === "All" || item.type === typeFilter
+    const matchesStatus = statusFilter === "All" || item.status === statusFilter
+    return matchesSearch && matchesType && matchesStatus
+  })
 
-  const sortedInventory = [...filteredInventory].sort((a, b) => {
-    if (!sortConfig) return 0;
+  const sortedMedia = [...filteredMedia].sort((a, b) => {
+    if (!sortConfig) return 0
     if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
+      return sortConfig.direction === "asc" ? -1 : 1
     }
     if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
+      return sortConfig.direction === "asc" ? 1 : -1
     }
-    return 0;
-  });
+    return 0
+  })
 
   // Handle sort request
-  const requestSort = (key: keyof InventoryItem) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
+//   const requestSort = (key: keyof MediaItem) => {
+//     let direction: "asc" | "desc" = "asc"
+//     if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+//       direction = "desc"
+//     }
+//     setSortConfig({ key, direction })
+//   }
 
   // CRUD operations
   const handleCreate = () => {
     const newItem = {
       ...formData,
       id: Date.now().toString(),
-    };
-    setInventory([...inventory, newItem]);
-    resetForm();
-  };
+      dateAdded: new Date().toISOString().split("T")[0],
+    }
+    setMediaList([...mediaList, newItem])
+    resetForm()
+  }
 
   const handleUpdate = () => {
-    if (!editingId) return;
-    setInventory(inventory.map(item => 
-      item.id === editingId ? { ...formData, id: editingId } : item
-    ));
-    resetForm();
-  };
+    if (!editingId) return
+    setMediaList(
+      mediaList.map((item) =>
+        item.id === editingId ? { ...formData, id: editingId, dateAdded: item.dateAdded } : item,
+      ),
+    )
+    resetForm()
+  }
 
   const handleDelete = (id: string) => {
-    setInventory(inventory.filter(item => item.id !== id));
-  };
+    setMediaList(mediaList.filter((item) => item.id !== id))
+  }
 
-  const handleEdit = (item: InventoryItem) => {
+  const handleEdit = (item: MediaItem) => {
     setFormData({
-      name: item.name,
-      category: item.category,
-      quantity: item.quantity,
-      price: item.price,
-      lastRestocked: item.lastRestocked,
-      supplier: item.supplier
-    });
-    setEditingId(item.id);
-    setShowForm(true);
-  };
+      title: item.title,
+      type: item.type,
+      status: item.status,
+      rating: item.rating,
+      genre: item.genre,
+      releaseDate: item.releaseDate,
+      notes: item.notes,
+    })
+    setEditingId(item.id)
+    setShowForm(true)
+  }
 
   const resetForm = () => {
-    setFormData({ 
-      name: '', 
-      category: '', 
-      quantity: 0, 
-      price: 0, 
-      lastRestocked: new Date().toISOString().split('T')[0], 
-      supplier: '' 
-    });
-    setEditingId(null);
-    setShowForm(false);
-  };
+    setFormData({
+      title: "",
+      type: "Movie",
+      status: "owned",
+      rating: 0,
+      genre: "",
+      releaseDate: "",
+      notes: "",
+    })
+    setEditingId(null)
+    setShowForm(false)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (editingId) {
-      handleUpdate();
+      handleUpdate()
     } else {
-      handleCreate();
+      handleCreate()
     }
-  };
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "Movie":
+        return <Play className="w-4 h-4" />
+      case "TV Show":
+        return <Play className="w-4 h-4" />
+      case "Book":
+        return <Book className="w-4 h-4" />
+      case "Game":
+        return <Gamepad2 className="w-4 h-4" />
+      case "Music":
+        return <Music className="w-4 h-4" />
+      default:
+        return <Play className="w-4 h-4" />
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "text-green-600 dark:text-green-400"
+      case "whishlist":
+        return "text-blue-600 dark:text-blue-400"
+      case "currently using":
+        return "text-yellow-600 dark:text-yellow-400"
+      case "owned":
+        return "text-orange-600 dark:text-orange-400"
+      default:
+        return "text-gray-600 dark:text-gray-400"
+    }
+  }
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 dark:text-gray-600"
+            }`}
+          />
+        ))}
+      </div>
+    )
+  }
 
   return (
-    <div className='bg-[#f0f0f0] dark:bg-[#121212]  text-[#121212] dark:text-white '>
-        <div className="container mx-auto p-4 max-w-6xl ">
-      <div className="bg-white mb-44  dark:bg-[#121212] p-2 rounded-2xl pb-4 shadow-lg overflow-hidden border border-[#29b093] dark:border-[#e0f11f]">
-        {/* Header */}
-        <div className="dark:from-[#e0f11f] rounded-2xl dark:to-[#e0f11f] bg-gradient-to-r from-[#29b093] to-[#1f67f1]  text-white dark:text-[#121212] p-6">
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-opacity-90">Manage your inventory items efficiently</p>
-        </div>
-
-        {/* Search and Filter Bar */}
-        <div className="p-6 border-b border-[#29b093]/20 dark:border-[#e0f11f]/20">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiSearch className="text-[#29b093] dark:text-[#e0f11f]" />
+    <div id="media" className="min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-[#121212] dark:to-[#0a0a0a] text-[#121212] dark:text-white">
+      <div className="container mx-auto p-4 max-w-7xl">
+        <div className="bg-white dark:bg-[#121212] rounded-3xl shadow-2xl overflow-hidden border border-[#29b093] dark:border-[#e0f11f]">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#29b093] to-[#1f67f1] dark:from-[#e0f11f] dark:to-[#b8d900] text-white dark:text-[#121212] p-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 dark:bg-[#121212]/20 rounded-2xl">
+                <Play className="w-8 h-8" />
               </div>
-              <input
-                type="text"
-                placeholder="Search items or suppliers..."
-                className="pl-10 w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div>
+                <h1 className="text-4xl font-bold">Media Tracker</h1>
+                <p className="text-lg opacity-90 mt-1">Track your favorite movies, shows, books, games & music</p>
+              </div>
             </div>
-            
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 bg-[#29b093] dark:bg-[#e0f11f] text-white dark:text-[#121212] px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md"
-            >
-              <FiFilter />
-              Filters
-              {showFilters ? <FiChevronUp /> : <FiChevronDown />}
-            </button>
-            
-            <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 bg-[#29b093] dark:bg-[#e0f11f] text-white dark:text-[#121212] px-4 py-2 rounded-lg hover:opacity-90 transition-opacity shadow-md"
-            >
-              <FiPlus />
-              Add Item
-            </button>
           </div>
 
-          {/* Expanded Filters */}
-          {showFilters && (
-            <div className="mt-6 p-6 bg-[#29b093]/10 dark:bg-[#e0f11f]/10 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Category</label>
-                  <select
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
+          {/* Search and Filter Bar */}
+          <div className="p-6 border-b border-[#121212]/20 dark:border-[#e0f11f]/20">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="text-[#29b093] dark:text-[#e0f11f] w-5 h-5" />
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Quantity Range</label>
-                  <div className="flex gap-3">
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      className="flex-1 rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      className="flex-1 rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    />
+                <input
+                  type="text"
+                  placeholder="Search titles, genres, or notes..."
+                  className="pl-12 w-full rounded-xl border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white transition-all"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex cursor-pointer items-center gap-2 bg-[#29b093] dark:bg-[#e0f11f] text-white dark:text-[#121212] px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-lg font-medium"
+              >
+                <Filter className="w-5 h-5" />
+                Filters
+                {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              <button
+                onClick={() => setShowForm(true)}
+                className="flex cursor-pointer items-center gap-2 bg-gradient-to-r from-[#29b093] to-[#1f67f1] dark:from-[#e0f11f] dark:to-[#b8d900] text-white dark:text-[#121212] px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-lg font-medium"
+              >
+                <Plus className="w-5 h-5" />
+                Add Media
+              </button>
+            </div>
+
+            {/* Expanded Filters */}
+            {showFilters && (
+              <div className="mt-6 p-6 bg-gradient-to-r from-[#29b093]/10 to-[#1f67f1]/10 dark:from-[#e0f11f]/10 dark:to-[#b8d900]/10 rounded-xl">
+                <div className="flex flex-wrap justify-between items-center gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">
+                      Media Type
+                    </label>
+                    <select
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={typeFilter}
+                      onChange={(e) => setTypeFilter(e.target.value)}
+                    >
+                      {mediaTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Price Range</label>
-                  <div className="flex gap-3">
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      className="flex-1 rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      className="flex-1 rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    />
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">Status</label>
+                    <select
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      {statusOptions.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">
+                      Rating Range
+                    </label>
+                    <div className="flex gap-2">
+                      <select className="flex-1 rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white">
+                        <option value="">Min</option>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <option key={n} value={n}>
+                            {n}★
+                          </option>
+                        ))}
+                      </select>
+                      <select className="flex-1 rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white">
+                        <option value="">Max</option>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <option key={n} value={n}>
+                            {n}★
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">
+                      Release Year
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="From"
+                        className="flex-1 rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      />
+                      <input
+                        type="number"
+                        placeholder="To"
+                        className="flex-1 rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Media Form */}
+          {showForm && (
+            <div className="p-6 border-b border-[#121212]/20 dark:border-[#e0f11f]/20">
+              <form
+                onSubmit={handleSubmit}
+                className="bg-gradient-to-r from-[#29b093]/5 to-[#1f67f1]/5 dark:from-[#e0f11f]/5 dark:to-[#b8d900]/5 p-8 rounded-2xl"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-[#121212] dark:text-white">
+                    {editingId ? "Edit Media" : "Add New Media"}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="text-[#121212]/60 dark:text-white/60 p-2 rounded-full hover:bg-[#121212]/5 dark:hover:bg-white/5 transition-all"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">Title *</label>
+                    <input
+                      type="text"
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">Type *</label>
+                    <select
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={formData.type}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value as MediaItem["type"] })}
+                      required
+                    >
+                      <option value="Movie">Movie</option>
+                      <option value="TV Show">TV Show</option>
+                      <option value="Book">Book</option>
+                      <option value="Game">Game</option>
+                      <option value="Music">Music</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">Status *</label>
+                    <select
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as MediaItem["status"] })}
+                      required
+                    >
+                      <option value="whishlist">whishlist</option>
+                      <option value="owned">owned</option>
+                      <option value="completed">completed</option>
+                      <option value="currently using">currently using</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">
+                      Rating (1-5 stars)
+                    </label>
+                    <select
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={formData.rating}
+                      onChange={(e) => setFormData({ ...formData, rating: Number.parseInt(e.target.value) || 0 })}
+                    >
+                      <option value={0}>No Rating</option>
+                      <option value={1}>1 Star</option>
+                      <option value={2}>2 Stars</option>
+                      <option value={3}>3 Stars</option>
+                      <option value={4}>4 Stars</option>
+                      <option value={5}>5 Stars</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">Genre</label>
+                    <input
+                      type="text"
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={formData.genre}
+                      onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+                      placeholder="e.g., Action, Drama, Sci-Fi"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">
+                      Release Date
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
+                      value={formData.releaseDate}
+                      onChange={(e) => setFormData({ ...formData, releaseDate: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-semibold text-[#121212] dark:text-white mb-2">Notes</label>
+                    <textarea
+                      rows={3}
+                      className="w-full rounded-lg border-2 border-[#121212]/30 dark:border-[#e0f11f]/30 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] focus:border-transparent bg-white dark:bg-[#121212] text-[#121212] dark:text-white resize-none"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder="Your thoughts, reviews, or additional notes..."
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 cursor-pointer py-3 border-2 border-[#29b093] dark:border-[#e0f11f] rounded-lg text-[#29b093] dark:text-[#e0f11f] hover:bg-[#29b093]/10 dark:hover:bg-[#e0f11f]/10 transition-all font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-8 cursor-pointer py-3 bg-gradient-to-r from-[#29b093] to-[#1f67f1] dark:from-[#e0f11f] dark:to-[#b8d900] text-white dark:text-[#121212] rounded-lg hover:opacity-90 transition-all shadow-lg font-medium"
+                  >
+                    {editingId ? "Update Media" : "Add Media"}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
-        </div>
 
-        {/* Item Form */}
-        {showForm && (
-          <div className="p-6 border-b border-[#29b093]/20 dark:border-[#e0f11f]/20">
-            <form onSubmit={handleSubmit} className="bg-[#29b093]/10 dark:bg-[#e0f11f]/10 p-6 rounded-lg shadow-inner">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-[#121212] dark:text-white">{editingId ? 'Edit Item' : 'Add New Item'}</h3>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="text-[#29b093] dark:text-[#e0f11f] hover:text-[#1e8c7a] dark:hover:text-[#c9d90a]"
-                >
-                  <FiX size={24} />
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Name</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Category</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Quantity</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={formData.quantity}
-                    onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 0})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Price ($)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Last Restocked</label>
-                  <input
-                    type="date"
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={formData.lastRestocked}
-                    onChange={(e) => setFormData({...formData, lastRestocked: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-[#121212] dark:text-white mb-2">Supplier</label>
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-[#29b093]/30 dark:border-[#e0f11f]/30 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#29b093] dark:focus:ring-[#e0f11f] bg-white dark:bg-[#121212] text-[#121212] dark:text-white"
-                    value={formData.supplier}
-                    onChange={(e) => setFormData({...formData, supplier: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-6 py-2 border border-[#29b093] dark:border-[#e0f11f] rounded-lg text-[#29b093] dark:text-[#e0f11f] hover:bg-[#29b093]/10 dark:hover:bg-[#e0f11f]/10 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-[#29b093] dark:bg-[#e0f11f] text-white dark:text-[#121212] rounded-lg hover:opacity-90 transition-opacity shadow-md"
-                >
-                  {editingId ? 'Update Item' : 'Add Item'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Inventory Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#29b093]/20 dark:divide-[#e0f11f]/20">
-            <thead className="bg-[#29b093]/10 dark:bg-[#e0f11f]/10">
-              <tr>
-                <th 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => requestSort('name')}
-                >
-                  <div className="flex items-center">
-                    Name
-                    {sortConfig?.key === 'name' && (
-                      sortConfig.direction === 'asc' ? <FiChevronUp className="ml-1" /> : <FiChevronDown className="ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => requestSort('category')}
-                >
-                  <div className="flex items-center">
-                    Category
-                    {sortConfig?.key === 'category' && (
-                      sortConfig.direction === 'asc' ? <FiChevronUp className="ml-1" /> : <FiChevronDown className="ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => requestSort('quantity')}
-                >
-                  <div className="flex items-center">
-                    Quantity
-                    {sortConfig?.key === 'quantity' && (
-                      sortConfig.direction === 'asc' ? <FiChevronUp className="ml-1" /> : <FiChevronDown className="ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider cursor-pointer"
-                  onClick={() => requestSort('price')}
-                >
-                  <div className="flex items-center">
-                    Price
-                    {sortConfig?.key === 'price' && (
-                      sortConfig.direction === 'asc' ? <FiChevronUp className="ml-1" /> : <FiChevronDown className="ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider"
-                >
-                  Last Restocked
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider"
-                >
-                  Supplier
-                </th>
-                <th scope="col" className="px-6 py-4 text-left text-sm font-medium text-[#121212] dark:text-white uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-[#121212] divide-y divide-[#29b093]/20 dark:divide-[#e0f11f]/20">
-              {sortedInventory.length > 0 ? (
-                sortedInventory.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#29b093]/5 dark:hover:bg-[#e0f11f]/5 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#121212] dark:text-white">
-                      {item.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#121212] dark:text-white">
-                      {item.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#121212] dark:text-white">
-                      {item.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#121212] dark:text-white">
-                      ${item.price.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#121212] dark:text-white">
-                      {new Date(item.lastRestocked).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#121212] dark:text-white">
-                      {item.supplier}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="text-[#29b093] dark:text-[#e0f11f] hover:text-[#1e8c7a] dark:hover:text-[#c9d90a] transition-colors"
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="text-[#ff4444] hover:text-[#cc0000] transition-colors"
-                        >
-                          <FiTrash2 />
-                        </button>
+          {/* Media Grid/Table */}
+          <div className="p-6">
+            {sortedMedia.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {sortedMedia.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white dark:bg-[#121212] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[#121212]/20 dark:border-[#e0f11f]/20 overflow-hidden"
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-[#29b093]/10 dark:bg-[#e0f11f]/10 rounded-lg">
+                            {getTypeIcon(item.type)}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg text-[#121212] dark:text-white line-clamp-1">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm text-[#121212]/70 dark:text-white/70">
+                              {item.type} • {item.genre}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="p-2 cursor-pointer text-[#29b093] dark:text-[#e0f11f] hover:bg-[#29b093]/10 dark:hover:bg-[#e0f11f]/10 rounded-lg transition-all"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-2 cursor-pointer text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-[#121212] dark:text-white">
-                    No items found matching your criteria
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
 
-        {/* Summary */}
-        <div className="p-6 bg-[#29b093]/10 dark:bg-[#e0f11f]/10 border-t border-[#29b093]/20 dark:border-[#e0f11f]/20">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-[#121212] dark:text-white">
-              Showing <span className="font-bold">{sortedInventory.length}</span> of <span className="font-bold">{inventory.length}</span> items
-            </div>
-            <div className="text-sm text-[#121212] dark:text-white">
-              Total value: <span className="font-bold">
-                ${sortedInventory.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
-              </span>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)} bg-current/10`}
+                          >
+                            {item.status}
+                          </span>
+                          {item.rating > 0 && renderStars(item.rating)}
+                        </div>
+
+                        {item.releaseDate && (
+                          <div className="flex items-center gap-2 text-sm text-[#121212]/70 dark:text-white/70">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(item.releaseDate).getFullYear()}
+                          </div>
+                        )}
+
+                        {item.notes && (
+                          <p className="text-sm text-[#121212] dark:text-white line-clamp-2 bg-[#121212]/5 dark:bg-white/5 p-3 rounded-lg">
+                            {item.notes}
+                          </p>
+                        )}
+
+                        <div className="text-xs text-[#121212]/60 dark:text-white/60 pt-2 border-t border-[#121212]/20 dark:border-[#e0f11f]/20">
+                          Added {new Date(item.dateAdded).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="p-4 bg-[#121212]/10 dark:bg-white/10 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Search className="w-8 h-8 text-[#121212]/50" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#121212] dark:text-white mb-2">No media found</h3>
+                <p className="text-[#121212]/70 dark:text-white/70">
+                  Try adjusting your search or filters, or add some new media to get started!
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Summary Footer */}
+          <div className="p-6 bg-gradient-to-r from-[#29b093]/5 to-[#1f67f1]/5 dark:from-[#e0f11f]/5 dark:to-[#b8d900]/5 border-t border-[#121212]/20 dark:border-[#e0f11f]/20">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="text-sm text-[#121212] dark:text-white">
+                Showing <span className="font-bold text-[#29b093] dark:text-[#e0f11f]">{sortedMedia.length}</span> of{" "}
+                <span className="font-bold">{mediaList.length}</span> items
+              </div>
+              <div className="flex gap-6 text-sm">
+                <div className="text-[#121212] dark:text-white">
+                  completed:{" "}
+                  <span className="font-bold text-green-600 dark:text-green-400">
+                    {mediaList.filter((item) => item.status === "completed").length}
+                  </span>
+                </div>
+                <div className="text-[#121212] dark:text-white">
+                  WhishList:{" "}
+                  <span className="font-bold text-blue-600 dark:text-blue-400">
+                    {mediaList.filter((item) => item.status === "whishlist").length}
+                  </span>
+                </div>
+                <div className="text-[#121212] dark:text-white">
+                  Avg Rating:{" "}
+                  <span className="font-bold text-yellow-600 dark:text-yellow-400">
+                    {(
+                      mediaList.filter((item) => item.rating > 0).reduce((sum, item) => sum + item.rating, 0) /
+                        mediaList.filter((item) => item.rating > 0).length || 0
+                    ).toFixed(1)}
+                    ★
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <Chatbot mediaItems={mediaList}/>
     </div>
-    </div>
-  );
+  )
 }
