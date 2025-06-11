@@ -33,8 +33,8 @@ A personal media collection app with an AI-powered assistant. Track your movies,
 
 1. **Clone the repo**  
    ```bash
-   git clone https://github.com/yourusername/media-collection-tracker.git
-   cd media-collection-tracker
+   git clone https://github.com/mohamad27911/media_tracker.git
+   cd media-media_tracker
    ```
 
 2. **Install dependencies**  
